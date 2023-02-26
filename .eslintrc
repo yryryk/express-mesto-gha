@@ -2,6 +2,6 @@
   "extends": "airbnb-base",
   "rules": {
     "no-underscore-dangle": 0,
-    "import/no-extraneous-dependencies": ["error", {"dependencies": false}]
+    "import/no-extraneous-dependencies": 0
   }
 }
