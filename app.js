@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const { PORT = 3000 } = process.env;
+const { USER_ID = '63fb79a9f342137f92baf6aa' } = process.env;
 const app = express();
 
 app.use(bodyParser.json()); // для собирания JSON-формата
@@ -13,7 +14,7 @@ mongoose.connect('mongodb://0.0.0.0:27017/mestodb');
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '63fb79a9f342137f92baf6aa',
+    _id: USER_ID,
   };
   next();
 });
