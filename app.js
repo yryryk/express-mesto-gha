@@ -23,6 +23,6 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use('*', (req, res) => res.status(errors.CAST_ERROR_CODE).send({ message: 'Здесь рыбы нет' }));
+app.use('*', (req, res) => res.status(errors.NOT_FOUND).send({ message: 'Здесь рыбы нет' }));
 
 app.listen(PORT);

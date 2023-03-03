@@ -21,7 +21,7 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(errors.VALIDATOR_ERROR_CODE)
+          .status(errors.NOT_FOUND)
           .send({ message: 'Этой карточки не существует' });
       }
       return res.send({ data: card });
@@ -35,7 +35,14 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (!card) {
+        return res
+          .status(errors.NOT_FOUND)
+          .send({ message: 'Этой карточки не существует' });
+      }
+      return res.send({ data: card });
+    })
     .catch((err) => getError(err, res));
 };
 
@@ -45,6 +52,13 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (!card) {
+        return res
+          .status(errors.NOT_FOUND)
+          .send({ message: 'Этой карточки не существует' });
+      }
+      return res.send({ data: card });
+    })
     .catch((err) => getError(err, res));
 };

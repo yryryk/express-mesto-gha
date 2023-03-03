@@ -1,7 +1,7 @@
 const errors = {
-  VALIDATOR_ERROR_CODE: 400,
-  CAST_ERROR_CODE: 404,
-  DEFAULT_ERROR_CODE: 500,
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  INTERNAL_SERVER_ERROR: 500,
 };
 
 const errorMessages = {
@@ -10,20 +10,23 @@ const errorMessages = {
   DEFAULT_MESSAGE: 'Шеф, всё пропало...',
 };
 
-const getError = (err, res) => {
-  if (err.name === 'ValidationError') {
+const getError = (err, res, next) => {
+  if (err.name === 'ValidationError' || err.name === 'CastError') {
     return res
-      .status(errors.VALIDATOR_ERROR_CODE)
+      .status(errors.BAD_REQUEST)
       .send({ message: errorMessages.VALIDATOR_MESSAGE });
   }
-  if (err.name === 'CastError') {
+  // if (err.name === 'CastError') {
+  //   return res
+  //     .status(errors.NOT_FOUND)
+  //     .send({ message: errorMessages.CAST_MESSAGE });
+  // }
+  if (err.name === 'InternalServerError') {
     return res
-      .status(errors.CAST_ERROR_CODE)
-      .send({ message: errorMessages.CAST_MESSAGE });
+      .status(errors.INTERNAL_SERVER_ERROR)
+      .send({ message: errorMessages.DEFAULT_MESSAGE });
   }
-  return res
-    .status(errors.DEFAULT_ERROR_CODE)
-    .send({ message: errorMessages.DEFAULT_MESSAGE });
+  return next(err);
 };
 
 module.exports = { errors, errorMessages, getError };
