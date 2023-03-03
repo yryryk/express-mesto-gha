@@ -26,4 +26,4 @@ const getError = (err, res) => {
     .send({ message: errorMessages.DEFAULT_MESSAGE });
 };
 
-module.exports = getError;
+module.exports = { errors, errorMessages, getError };
