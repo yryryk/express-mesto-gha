@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const getError = require('../utils/errors');
+const { errors, getError } = require('../utils/errors');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -18,7 +18,14 @@ module.exports.createCard = (req, res) => {
 
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((card) => res.send({ data: card }))
+    .then((card) => {
+      if (!card) {
+        return res
+          .status(errors.VALIDATOR_ERROR_CODE)
+          .send({ message: 'Этой карточки не существует' });
+      }
+      return res.send({ data: card });
+    })
     .catch((err) => getError(err, res));
 };
 
