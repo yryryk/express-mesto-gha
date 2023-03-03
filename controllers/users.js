@@ -13,7 +13,7 @@ module.exports.getUser = (req, res) => {
       if (!user) {
         return res
           .status(errors.NOT_FOUND)
-          .send({ message: 'Этой карточки не существует' });
+          .send({ message: 'Этого пользователя не существует' });
       }
       return res.send({ data: user });
     })
@@ -34,7 +34,7 @@ module.exports.updateUser = (req, res) => {
       if (!user) {
         return res
           .status(errors.NOT_FOUND)
-          .send({ message: 'Этой карточки не существует' });
+          .send({ message: 'Этого пользователя не существует' });
       }
       return res.send({ data: user });
     })
@@ -51,7 +51,7 @@ module.exports.updateAvatar = (req, res) => {
       if (!user) {
         return res
           .status(errors.NOT_FOUND)
-          .send({ message: 'Этой карточки не существует' });
+          .send({ message: 'Этого пользователя не существует' });
       }
       return res.send({ data: user });
     })

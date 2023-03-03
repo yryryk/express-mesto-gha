@@ -16,11 +16,6 @@ const getError = (err, res, next) => {
       .status(errors.BAD_REQUEST)
       .send({ message: errorMessages.VALIDATOR_MESSAGE });
   }
-  // if (err.name === 'CastError') {
-  //   return res
-  //     .status(errors.NOT_FOUND)
-  //     .send({ message: errorMessages.CAST_MESSAGE });
-  // }
   if (err.name === 'InternalServerError') {
     return res
       .status(errors.INTERNAL_SERVER_ERROR)
