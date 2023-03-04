@@ -4,6 +4,7 @@ const { errors, getError } = require('../utils/errors');
 module.exports.getCards = (req, res) => {
   Card.find({})
     .populate('owner')
+    .populate('likes')
     .then((cards) => res.send({ data: cards }))
     .catch((err) => getError(err, res));
 };

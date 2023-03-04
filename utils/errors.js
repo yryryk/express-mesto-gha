@@ -16,12 +16,12 @@ const getError = (err, res, next) => {
       .status(errors.BAD_REQUEST)
       .send({ message: errorMessages.VALIDATOR_MESSAGE });
   }
-  if (err.name === 'InternalServerError') {
-    return res
-      .status(errors.INTERNAL_SERVER_ERROR)
-      .send({ message: errorMessages.DEFAULT_MESSAGE });
+  if (!err.name === 'InternalServerError') {
+    return next(err);
   }
-  return next(err);
+  return res
+    .status(errors.INTERNAL_SERVER_ERROR)
+    .send({ message: errorMessages.DEFAULT_MESSAGE });
 };
 
 module.exports = { errors, errorMessages, getError };
