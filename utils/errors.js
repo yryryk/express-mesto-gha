@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+
 const errors = {
   BAD_REQUEST: 400,
   NOT_FOUND: 404,
@@ -11,17 +13,11 @@ const errorMessages = {
 };
 
 const getError = (err, res, next) => {
-  if (err.name === 'ValidationError' || err.name === 'CastError') {
+  if (err instanceof mongoose.Error.ValidationError || err instanceof mongoose.Error.CastError) {
     return res
       .status(errors.BAD_REQUEST)
       .send({ message: errorMessages.VALIDATOR_MESSAGE });
   }
-  if (!err.name === 'InternalServerError') {
-    return next(err);
-  }
-  return res
-    .status(errors.INTERNAL_SERVER_ERROR)
-    .send({ message: errorMessages.DEFAULT_MESSAGE });
+  return next(err);
 };
-
 module.exports = { errors, errorMessages, getError };
