@@ -1,3 +1,5 @@
+const validator = require('validator');
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 const { errors, getError } = require('../utils/errors');
 
@@ -21,10 +23,31 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name,
+    about,
+    avatar,
+    email,
+    password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.send({ data: user }))
+  bcrypt.hash(password, 10)
+    .then((hash) => {
+      if (validator.isEmail(email)) {
+        return User.create({
+          name,
+          about,
+          avatar,
+          email,
+          password: hash,
+        })
+          .then((user) => res.send({ data: user }))
+          .catch((err) => getError(err, res));
+      }
+      return res
+        .status(errors.BAD_REQUEST)
+        .send({ message: 'Неправильный email' });
+    })
     .catch((err) => getError(err, res));
 };
 
