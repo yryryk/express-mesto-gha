@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -28,5 +29,19 @@ const userSchema = new mongoose.Schema({
     minlength: 8,
   },
 });
+
+function findUserByCredentials(email, password) {
+  return this.findOne({ email })
+    .orFail(() => Promise.reject(new Error('Пользователь не найден')))
+    .then((user) => bcrypt.compare(password, user.password)
+      .then((equal) => {
+        if (equal) {
+          return user;
+        }
+        return Promise.reject(new Error('Пользователь не найден'));
+      }));
+}
+
+userSchema.statics.findUserByCredentials = findUserByCredentials;
 
 module.exports = mongoose.model('user', userSchema);
