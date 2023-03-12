@@ -103,3 +103,16 @@ module.exports.login = (req, res) => {
         .send({ message: err.message });
     });
 };
+
+module.exports.getCurrentUser = (req, res) => {
+  User.findById(req.user)
+    .then((user) => {
+      if (!user) {
+        res
+          .status(errors.NOT_FOUND)
+          .send({ message: 'Этого пользователя не существует' });
+      }
+      res.send({ data: user });
+    })
+    .catch((err) => getError(err, res));
+};

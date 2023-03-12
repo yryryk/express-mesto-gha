@@ -2,10 +2,9 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors, errorMessages } = require('./utils/errors');
 const { createUser, login } = require('./controllers/users');
-
+const { auth } = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
-const { USER_ID = '63fb79a9f342137f92baf6aa' } = process.env;
 const app = express();
 
 app.use(express.json()); // для собирания JSON-формата
@@ -14,14 +13,9 @@ app.use(express.urlencoded({ extended: true })); // для приёма веб-�
 mongoose.set('strictQuery', true);
 mongoose.connect('mongodb://0.0.0.0:27017/mestodb');
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: USER_ID,
-  };
-  next();
-});
 app.post('/signin', login);
 app.post('/signup', createUser);
+app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
