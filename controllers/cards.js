@@ -17,14 +17,20 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         return res
           .status(errors.NOT_FOUND)
           .send({ message: 'Этой карточки не существует' });
       }
-      return res.send({ data: card });
+      if (String(req.user._id) !== String(card.owner)) {
+        return res
+          .status(errors.FORBIDDEN)
+          .send({ message: 'Невозможно удалить' });
+      }
+      return card.remove()
+        .then(() => res.send({ data: card }));
     })
     .catch((err) => getError(err, res));
 };
