@@ -2,28 +2,29 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { errors, getError } = require('../utils/errors');
+const { getError } = require('../utils/errors');
+const NotFoundError = require('../utils/NotFoundError');
+const BadRequestError = require('../utils/BadRequestError');
+const UnautorizedError = require('../utils/UnautorizedError');
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => getError(err, res));
+    .catch((err) => getError(err, res, next));
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        return res
-          .status(errors.NOT_FOUND)
-          .send({ message: 'Этого пользователя не существует' });
+        throw new NotFoundError('Этого пользователя не существует');
       }
-      return res.send({ data: user });
+      res.send({ data: user });
     })
-    .catch((err) => getError(err, res));
+    .catch((err) => getError(err, res, next));
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name,
     about,
@@ -34,38 +35,34 @@ module.exports.createUser = (req, res) => {
 
   bcrypt.hash(password, 10)
     .then((hash) => {
-      if (validator.isEmail(email)) {
-        return User.create({
-          name,
-          about,
-          avatar,
-          email,
-          password: hash,
-        })
-          .then((user) => res.send({ data: user }))
-          .catch((err) => getError(err, res));
+      if (!validator.isEmail(email)) {
+        throw new BadRequestError('Неправильный email');
       }
-      return res
-        .status(errors.BAD_REQUEST)
-        .send({ message: 'Неправильный email' });
+      User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      })
+        .then((user) => res.send({ data: user }))
+        .catch((err) => getError(err, res, next));
     })
-    .catch((err) => getError(err, res));
+    .catch((err) => getError(err, res, next));
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { ...req.body }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        return res
-          .status(errors.NOT_FOUND)
-          .send({ message: 'Этого пользователя не существует' });
+        throw new NotFoundError('Этого пользователя не существует');
       }
-      return res.send({ data: user });
+      res.send({ data: user });
     })
-    .catch((err) => getError(err, res));
+    .catch((err) => getError(err, res, next));
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar: req.body.avatar },
@@ -73,22 +70,20 @@ module.exports.updateAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res
-          .status(errors.NOT_FOUND)
-          .send({ message: 'Этого пользователя не существует' });
+        throw new NotFoundError('Этого пользователя не существует');
       }
-      return res.send({ data: user });
+      res.send({ data: user });
     })
-    .catch((err) => getError(err, res));
+    .catch((err) => getError(err, res, next));
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const {
     email,
     password,
   } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
@@ -97,22 +92,19 @@ module.exports.login = (req, res) => {
       );
       res.send({ token });
     })
-    .catch((err) => {
-      res
-        .status(errors.UNAUTORIZED)
-        .send({ message: err.message });
-    });
+    .catch(() => {
+      throw new UnautorizedError('Необходима авторизация');
+    })
+    .catch(next);
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user)
     .then((user) => {
       if (!user) {
-        res
-          .status(errors.NOT_FOUND)
-          .send({ message: 'Этого пользователя не существует' });
+        throw new NotFoundError('Этого пользователя не существует');
       }
       res.send({ data: user });
     })
-    .catch((err) => getError(err, res));
+    .catch((err) => getError(err, res, next));
 };

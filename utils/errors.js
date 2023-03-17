@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const BadRequestError = require('./BadRequestError');
 
 const errors = {
   BAD_REQUEST: 400,
@@ -16,11 +17,18 @@ const errorMessages = {
 };
 
 const getError = (err, res, next) => {
-  if (err instanceof mongoose.Error.ValidationError || err instanceof mongoose.Error.CastError) {
-    return res
-      .status(errors.BAD_REQUEST)
-      .send({ message: errorMessages.VALIDATOR_MESSAGE });
+  try {
+    if (err instanceof mongoose.Error.ValidationError || err instanceof mongoose.Error.CastError) {
+      throw new BadRequestError('Вы ещё можете всё исправить!');
+    }
+  } catch (error) {
+    next(error);
   }
-  return next(err);
+  next(err);
 };
-module.exports = { errors, errorMessages, getError };
+
+module.exports = {
+  errors,
+  errorMessages,
+  getError,
+};

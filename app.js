@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { errors, errorMessages } = require('./utils/errors');
 const { createUser, login } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
+const NotFoundError = require('./utils/NotFoundError');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -19,11 +19,19 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use('*', (req, res) => res.status(errors.NOT_FOUND).send({ message: 'Здесь рыбы нет' }));
-app.use((req, res) => {
+app.use('*', () => {
+  throw new NotFoundError('Здесь рыбы нет');
+});
+
+app.use((err, req, res) => {
+  const { statusCode = 500, message } = err;
   res
-    .status(errors.INTERNAL_SERVER_ERROR)
-    .send({ message: errorMessages.DEFAULT_MESSAGE });
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
 });
 
 app.listen(PORT);
