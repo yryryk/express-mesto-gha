@@ -16,13 +16,9 @@ const errorMessages = {
   DEFAULT_MESSAGE: 'Шеф, всё пропало...',
 };
 
-const getError = (err, res, next) => {
-  try {
-    if (err instanceof mongoose.Error.ValidationError || err instanceof mongoose.Error.CastError) {
-      throw new BadRequestError('Вы ещё можете всё исправить!');
-    }
-  } catch (error) {
-    next(error);
+const getError = (err, next) => {
+  if (err instanceof mongoose.Error.ValidationError || err instanceof mongoose.Error.CastError) {
+    next(new BadRequestError('Вы ещё можете всё исправить!'));
   }
   next(err);
 };

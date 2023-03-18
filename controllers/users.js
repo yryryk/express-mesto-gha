@@ -6,11 +6,12 @@ const { getError } = require('../utils/errors');
 const NotFoundError = require('../utils/NotFoundError');
 const BadRequestError = require('../utils/BadRequestError');
 const UnautorizedError = require('../utils/UnautorizedError');
+const ConflictError = require('../utils/ConflictError');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -21,7 +22,7 @@ module.exports.getUser = (req, res, next) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -38,17 +39,21 @@ module.exports.createUser = (req, res, next) => {
       if (!validator.isEmail(email)) {
         throw new BadRequestError('Неправильный email');
       }
-      User.create({
+      return User.create({
         name,
         about,
         avatar,
         email,
         password: hash,
-      })
-        .then((user) => res.send({ data: user }))
-        .catch((err) => getError(err, res, next));
+      });
     })
-    .catch((err) => getError(err, res, next));
+    .then((user) => res.send({ data: user }))
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new ConflictError('Этот пользователь уже существует'));
+      }
+      getError(err, next);
+    });
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -59,7 +64,7 @@ module.exports.updateUser = (req, res, next) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -74,7 +79,7 @@ module.exports.updateAvatar = (req, res, next) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
 
 module.exports.login = (req, res, next) => {
@@ -106,5 +111,5 @@ module.exports.getCurrentUser = (req, res, next) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };

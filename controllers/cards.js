@@ -7,7 +7,7 @@ module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -15,7 +15,7 @@ module.exports.createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -30,7 +30,7 @@ module.exports.deleteCard = (req, res, next) => {
       card.remove()
         .then(() => res.send({ data: card }));
     })
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -45,7 +45,7 @@ module.exports.likeCard = (req, res, next) => {
       }
       res.send({ data: card });
     })
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -60,5 +60,5 @@ module.exports.dislikeCard = (req, res, next) => {
       }
       res.send({ data: card });
     })
-    .catch((err) => getError(err, res, next));
+    .catch((err) => getError(err, next));
 };
