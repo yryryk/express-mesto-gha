@@ -18,9 +18,9 @@ const errorMessages = {
 
 const getError = (err, next) => {
   if (err instanceof mongoose.Error.ValidationError || err instanceof mongoose.Error.CastError) {
-    next(new BadRequestError('Вы ещё можете всё исправить!'));
+    return next(new BadRequestError('Вы ещё можете всё исправить!'));
   }
-  next(err);
+  return next(err);
 };
 
 module.exports = {

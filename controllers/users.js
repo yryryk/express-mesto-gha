@@ -50,9 +50,9 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.code === 11000) {
-        next(new ConflictError('Этот пользователь уже существует'));
+        return next(new ConflictError('Этот пользователь уже существует'));
       }
-      getError(err, next);
+      return getError(err, next);
     });
 };
 

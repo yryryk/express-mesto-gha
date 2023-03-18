@@ -50,7 +50,7 @@ app.use('*', () => {
   throw new NotFoundError('Здесь рыбы нет');
 });
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
   res
     .status(statusCode)
@@ -59,6 +59,7 @@ app.use((err, req, res) => {
         ? 'На сервере произошла ошибка'
         : message,
     });
+  next();
 });
 
 app.listen(PORT);
