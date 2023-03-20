@@ -1,4 +1,3 @@
-const validator = require('validator');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -71,7 +70,11 @@ module.exports.updateUser = (req, res, next) => {
     name,
     about,
   } = req.body;
-  User.findByIdAndUpdate(req.user._id, name, about, { new: true, runValidators: true })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true },
+  )
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Этого пользователя не существует');
