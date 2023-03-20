@@ -33,9 +33,9 @@ module.exports.deleteCard = (req, res, next) => {
       if (String(req.user._id) !== String(card.owner)) {
         throw new ForbiddenError('Невозможно удалить');
       }
-      card.remove()
-        .then(() => res.send({ data: card }));
+      return card.remove();
     })
+    .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err instanceof mongoose.Error.CastError) {
         return next(new BadRequestError('Вы ещё можете всё исправить!'));

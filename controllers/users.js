@@ -41,18 +41,13 @@ module.exports.createUser = (req, res, next) => {
   } = req.body;
 
   bcrypt.hash(password, 10)
-    .then((hash) => {
-      if (!validator.isEmail(email)) {
-        throw new BadRequestError('Неправильный email');
-      }
-      return User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password: hash,
-      });
-    })
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => res.send({
       name: user.name,
       about: user.about,
@@ -72,7 +67,11 @@ module.exports.createUser = (req, res, next) => {
 };
 
 module.exports.updateUser = (req, res, next) => {
-  User.findByIdAndUpdate(req.user._id, { ...req.body }, { new: true, runValidators: true })
+  const {
+    name,
+    about,
+  } = req.body;
+  User.findByIdAndUpdate(req.user._id, name, about, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
         throw new NotFoundError('Этого пользователя не существует');
