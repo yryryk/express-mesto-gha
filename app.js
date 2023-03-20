@@ -6,6 +6,7 @@ const { errors, celebrate, Joi } = require('celebrate');
 const { createUser, login } = require('./controllers/users');
 const { auth } = require('./middlewares/auth');
 const NotFoundError = require('./utils/NotFoundError');
+const { URL_REGEX } = require('./utils/constants');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -35,7 +36,7 @@ app.post('/signup', celebrate({
     email: Joi.string().required().email(),
     password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(/http(s)?:\/\/(www\.)?[a-zA-Z0-9@:%._+~#=]{2,256}\.[a-zA-Z0-9]{2,6}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)/),
+    avatar: Joi.string().pattern(URL_REGEX),
     about: Joi.string().min(2).max(30),
   }),
 }), createUser);
@@ -46,8 +47,8 @@ app.use('/cards', require('./routes/cards'));
 
 app.use(errors());
 
-app.use('*', () => {
-  throw new NotFoundError('Здесь рыбы нет');
+app.use('*', (next) => {
+  next(new NotFoundError('Здесь рыбы нет'));
 });
 
 app.use((err, req, res, next) => {

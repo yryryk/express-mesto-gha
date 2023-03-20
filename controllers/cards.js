@@ -1,13 +1,14 @@
+const mongoose = require('mongoose');
 const Card = require('../models/card');
-const { getError } = require('../utils/errors');
 const NotFoundError = require('../utils/NotFoundError');
 const ForbiddenError = require('../utils/ForbiddenError');
+const BadRequestError = require('../utils/BadRequestError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .populate(['owner', 'likes'])
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => getError(err, next));
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -15,7 +16,12 @@ module.exports.createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
-    .catch((err) => getError(err, next));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.ValidationError) {
+        return next(new BadRequestError('Вы ещё можете всё исправить!'));
+      }
+      return next(err);
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -30,7 +36,12 @@ module.exports.deleteCard = (req, res, next) => {
       card.remove()
         .then(() => res.send({ data: card }));
     })
-    .catch((err) => getError(err, next));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return next(new BadRequestError('Вы ещё можете всё исправить!'));
+      }
+      return next(err);
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -45,7 +56,12 @@ module.exports.likeCard = (req, res, next) => {
       }
       res.send({ data: card });
     })
-    .catch((err) => getError(err, next));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return next(new BadRequestError('Вы ещё можете всё исправить!'));
+      }
+      return next(err);
+    });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -60,5 +76,10 @@ module.exports.dislikeCard = (req, res, next) => {
       }
       res.send({ data: card });
     })
-    .catch((err) => getError(err, next));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return next(new BadRequestError('Вы ещё можете всё исправить!'));
+      }
+      return next(err);
+    });
 };

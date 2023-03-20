@@ -1,17 +1,18 @@
 const validator = require('validator');
+const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { getError } = require('../utils/errors');
 const NotFoundError = require('../utils/NotFoundError');
 const BadRequestError = require('../utils/BadRequestError');
-const UnautorizedError = require('../utils/UnautorizedError');
 const ConflictError = require('../utils/ConflictError');
+const { SECRET } = require('../utils/constants');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => getError(err, next));
+    .catch(next);
 };
 
 module.exports.getUser = (req, res, next) => {
@@ -22,7 +23,12 @@ module.exports.getUser = (req, res, next) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => getError(err, next));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return next(new BadRequestError('Вы ещё можете всё исправить!'));
+      }
+      return next(err);
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -58,7 +64,10 @@ module.exports.createUser = (req, res, next) => {
       if (err.code === 11000) {
         return next(new ConflictError('Этот пользователь уже существует'));
       }
-      return getError(err, next);
+      if (err instanceof mongoose.Error.ValidationError) {
+        return next(new BadRequestError('Вы ещё можете всё исправить!'));
+      }
+      return next(err);
     });
 };
 
@@ -98,13 +107,10 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        '992ab2eceb0fc604c74b637713c012453bafbbf38d127957c13f46cb99b83803',
+        SECRET,
         { expiresIn: '7d' },
       );
       res.send({ token });
-    })
-    .catch(() => {
-      throw new UnautorizedError('Необходима авторизация');
     })
     .catch(next);
 };
@@ -117,5 +123,10 @@ module.exports.getCurrentUser = (req, res, next) => {
       }
       res.send({ data: user });
     })
-    .catch((err) => getError(err, next));
+    .catch((err) => {
+      if (err instanceof mongoose.Error.CastError) {
+        return next(new BadRequestError('Вы ещё можете всё исправить!'));
+      }
+      return next(err);
+    });
 };
