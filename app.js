@@ -31,7 +31,7 @@ app.use((req, res, next) => {
   const { method } = req;
   const DEFAULT_ALLOWED_METHODS = 'GET,PUT,PATCH,POST,DELETE';
   const requestHeaders = req.headers['access-control-request-headers'];
-  if (origin === 'http://localhost:3000') {
+  if (origin === 'http://mesto-react.tovchennikov.nomoredomains.work' || origin === 'https://mesto-react.tovchennikov.nomoredomains.work') {
     res.header('Access-Control-Allow-Origin', origin);
   }
   if (method === 'OPTIONS') {
