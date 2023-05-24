@@ -1,5 +1,6 @@
 [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 # express-mesto-gha
+#### Статус: завершён
 
 ## Описание
 
